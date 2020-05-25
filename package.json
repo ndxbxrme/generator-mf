@@ -1,0 +1,21 @@
+{
+  "name": "generator-mf",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "coffee -o generators src",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "coffeescript": "^2.5.1"
+  },
+  "dependencies": {
+    "cross-spawn": "^7.0.2",
+    "glob": "^7.1.6",
+    "yeoman-generator": "^0.19.2"
+  }
+}

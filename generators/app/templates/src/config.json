@@ -1,0 +1,15 @@
+{
+  "api": {
+    "url": "<%= settings.apiUrl %>"
+  },
+  "cognito": {
+    "region": "<%= settings.cognitoRegion %>",
+    "userPoolId": "<%= settings.cognitoUserPoolId %>",
+    "userPoolWebClientId": "<%= settings.cognitoWebClientId %>"
+  },
+  "cloudinary": {
+    "url": "https://api.cloudinary.com/v1_1/<%= settings.cloudinaryId %>/image/upload",
+    "imageUrl": "https://res.cloudinary.com/<%= settings.cloudinaryId %>/image/upload",
+    "uploadPreset": "<%= settings.cloudinaryPreset %>"
+  }
+}
