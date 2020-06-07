@@ -10,20 +10,23 @@
   fs = require('fs');
 
   spawnSync = function(command, args, cb) {
-    var poll, result;
-    result = spawn(command, args, {
-      stdio: 'inherit'
-    });
-    poll = function() {
-      if (result._closesGot === 1) {
-        if (typeof cb === "function") {
-          cb();
+    return new Promise(function(resolve, reject) {
+      var poll, result;
+      result = spawn(command, args, {
+        stdio: 'inherit'
+      });
+      poll = function() {
+        if (result._closesGot === 1) {
+          if (typeof cb === "function") {
+            cb();
+          }
+          resolve();
+        } else {
+          setTimeout(poll, 500);
         }
-      } else {
-        setTimeout(poll, 500);
-      }
-    };
-    poll();
+      };
+      poll();
+    });
   };
 
   write = function(yeoman, options, cb) {
@@ -31,7 +34,7 @@
     return files = glob('**', {
       dot: true,
       cwd: yeoman.sourceRoot()
-    }, function(err, files) {
+    }, async function(err, files) {
       var allGood, e, f, filter, foundFilter, i, len, name;
       for (i = 0, len = files.length; i < len; i++) {
         f = files[i];
@@ -51,15 +54,23 @@
         }
         if (allGood) {
           if (fs.lstatSync(yeoman.templatePath(f)).isDirectory()) {
-            fs.mkdirSync(yeoman.destinationPath(f));
+            try {
+              fs.mkdirSync(yeoman.destinationPath(f));
+            } catch (error) {}
             continue;
           }
-          console.log('writing', f);
           try {
-            yeoman.fs.copyTpl(yeoman.templatePath(f), yeoman.destinationPath(name.replace('compname', yeoman.compname)), options);
-          } catch (error) {
-            e = error;
+            await spawnSync('rm', ['-rf', yeoman.destinationPath(name.replace('compname', yeoman.compname))]);
+          } catch (error) {}
+          if (/\.png$/.test(yeoman.templatePath(f))) {
             fs.copyFileSync(yeoman.templatePath(f), yeoman.destinationPath(name.replace('compname', yeoman.compname)));
+          } else {
+            try {
+              yeoman.fs.copyTpl(yeoman.templatePath(f), yeoman.destinationPath(name.replace('compname', yeoman.compname)), options);
+            } catch (error) {
+              e = error;
+              fs.copyFileSync(yeoman.templatePath(f), yeoman.destinationPath(name.replace('compname', yeoman.compname)));
+            }
           }
         }
       }

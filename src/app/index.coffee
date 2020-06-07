@@ -14,16 +14,19 @@ module.exports = yeoman.generators.Base.extend
         type: 'input'
         name: 'displayName'
         message: 'Display name'
+        default: @name
       }
       {
         type: 'input'
         name: 'productPrefix'
         message: 'Product prefix, eg com.rainstormweb'
+        default: 'com.rainstormweb'
       }
       {
         type: 'input'
         name: 's3bucket'
         message: 'S3 bucket for deployment'
+        default: 's3://www.rainstormweb.com/' + @name
       }
       {
         type: 'input'
@@ -61,16 +64,6 @@ module.exports = yeoman.generators.Base.extend
         name: 'cloudinaryPreset'
         message: 'Cloudinary upload preset'
       }
-      {
-        type: 'checkbox'
-        name: 'targets'
-        message: 'Deployment targets'
-        choices: [
-          'Android'
-          'Ios'
-          'Electron'
-        ]
-      }
 
     ], (answers) =>
       @filters =
@@ -98,21 +91,8 @@ module.exports = yeoman.generators.Base.extend
     @config.set 'filters', @filters
     @config.set 'appname', @filters.settings.appName
     utils.write this, @filters, cb
-    return
-  installSubs: ->
-    cb = @async()
-    subgenerators = []
-    console.log JSON.stringify @filters
-    subgenerators.push ['mf:android'] if @filters.settings.targets.includes 'Android'
-    subgenerators.push ['mf:ios'] if @filters.settings.targets.includes 'Ios'
-    subgenerators.push ['mf:electron'] if @filters.settings.targets.includes 'Electron'
-    i = 0
-    while i < subgenerators.length
-      utils.spawnSync 'yo', subgenerators[i]
-    cb()
-  installDeps: ->
+  end: ->
     cb = @async()
     console.log 'install dev deps'
-    utils.spawnSync 'npm', ['install', '--save-dev', 'coffee-loader', 'coffeescript', 'css-loader', 'file-loader', 'html-webpack-plugin', 'image-webpack-loader', 'pug', 'pug-loader', 'replace-in-file', 'style-loader', 'stylus', 'stylus-loader', 'webpack', 'webpack-cli', 'webpack-dev-server', 'webpack-merge']
-    utils.spawnSync 'npm', ['install', '--save', 'aws-amplify', 'cloudinary-core', 'is-mobile']
-    cb()
+    utils.spawnSync 'npm', ['install', '--save-dev', 'coffee-loader', 'coffeescript', 'css-loader', 'file-loader', 'html-webpack-plugin', 'image-webpack-loader', 'pug', 'pug-loader', 'replace-in-file', 'style-loader', 'stylus', 'stylus-loader', 'webpack', 'webpack-cli', 'webpack-dev-server', 'webpack-merge'], ->
+      utils.spawnSync 'npm', ['install', '--save', 'aws-amplify', 'cloudinary-core', 'is-mobile'], cb

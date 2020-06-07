@@ -5,16 +5,18 @@ fs = require 'fs'
 
 
 spawnSync = (command, args, cb) ->
-  result = spawn command, args, stdio:'inherit'
-  poll = ->
-    if result._closesGot == 1
-      cb?()
-    else
-      setTimeout poll, 500
-    return
+  new Promise (resolve, reject) ->
+    result = spawn command, args, stdio:'inherit'
+    poll = ->
+      if result._closesGot == 1
+        cb?()
+        resolve()
+      else
+        setTimeout poll, 500
+      return
 
-  poll()
-  return
+    poll()
+    return
 
 write = (yeoman, options, cb) ->
   files = glob '**',
@@ -35,13 +37,18 @@ write = (yeoman, options, cb) ->
             break
       if allGood
         if fs.lstatSync(yeoman.templatePath(f)).isDirectory()
-          fs.mkdirSync yeoman.destinationPath(f)
+          try
+            fs.mkdirSync yeoman.destinationPath(f)
           continue
-        console.log 'writing', f
         try
-          yeoman.fs.copyTpl yeoman.templatePath(f), yeoman.destinationPath(name.replace('compname', yeoman.compname)), options
-        catch e
+          await spawnSync 'rm', ['-rf', yeoman.destinationPath(name.replace('compname', yeoman.compname))]
+        if /\.png$/.test yeoman.templatePath(f)
           fs.copyFileSync yeoman.templatePath(f), yeoman.destinationPath(name.replace('compname', yeoman.compname))
+        else
+          try
+            yeoman.fs.copyTpl yeoman.templatePath(f), yeoman.destinationPath(name.replace('compname', yeoman.compname)), options
+          catch e
+            fs.copyFileSync yeoman.templatePath(f), yeoman.destinationPath(name.replace('compname', yeoman.compname))
     cb?()
 
 launchGrunt = (yeoman) ->

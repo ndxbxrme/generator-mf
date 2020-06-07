@@ -22,17 +22,20 @@
         {
           type: 'input',
           name: 'displayName',
-          message: 'Display name'
+          message: 'Display name',
+          default: this.name
         },
         {
           type: 'input',
           name: 'productPrefix',
-          message: 'Product prefix, eg com.rainstormweb'
+          message: 'Product prefix, eg com.rainstormweb',
+          default: 'com.rainstormweb'
         },
         {
           type: 'input',
           name: 's3bucket',
-          message: 'S3 bucket for deployment'
+          message: 'S3 bucket for deployment',
+          default: 's3://www.rainstormweb.com/' + this.name
         },
         {
           type: 'input',
@@ -69,14 +72,6 @@
           type: 'input',
           name: 'cloudinaryPreset',
           message: 'Cloudinary upload preset'
-        },
-        {
-          type: 'checkbox',
-          name: 'targets',
-          message: 'Deployment targets',
-          choices: ['Android',
-        'Ios',
-        'Electron']
         }
       ], (answers) => {
         this.filters = {
@@ -110,35 +105,15 @@
       this.destinationRoot(process.cwd());
       this.config.set('filters', this.filters);
       this.config.set('appname', this.filters.settings.appName);
-      utils.write(this, this.filters, cb);
+      return utils.write(this, this.filters, cb);
     },
-    installSubs: function() {
-      var cb, i, subgenerators;
-      cb = this.async();
-      subgenerators = [];
-      console.log(JSON.stringify(this.filters));
-      if (this.filters.settings.targets.includes('Android')) {
-        subgenerators.push(['mf:android']);
-      }
-      if (this.filters.settings.targets.includes('Ios')) {
-        subgenerators.push(['mf:ios']);
-      }
-      if (this.filters.settings.targets.includes('Electron')) {
-        subgenerators.push(['mf:electron']);
-      }
-      i = 0;
-      while (i < subgenerators.length) {
-        utils.spawnSync('yo', subgenerators[i]);
-      }
-      return cb();
-    },
-    installDeps: function() {
+    end: function() {
       var cb;
       cb = this.async();
       console.log('install dev deps');
-      utils.spawnSync('npm', ['install', '--save-dev', 'coffee-loader', 'coffeescript', 'css-loader', 'file-loader', 'html-webpack-plugin', 'image-webpack-loader', 'pug', 'pug-loader', 'replace-in-file', 'style-loader', 'stylus', 'stylus-loader', 'webpack', 'webpack-cli', 'webpack-dev-server', 'webpack-merge']);
-      utils.spawnSync('npm', ['install', '--save', 'aws-amplify', 'cloudinary-core', 'is-mobile']);
-      return cb();
+      return utils.spawnSync('npm', ['install', '--save-dev', 'coffee-loader', 'coffeescript', 'css-loader', 'file-loader', 'html-webpack-plugin', 'image-webpack-loader', 'pug', 'pug-loader', 'replace-in-file', 'style-loader', 'stylus', 'stylus-loader', 'webpack', 'webpack-cli', 'webpack-dev-server', 'webpack-merge'], function() {
+        return utils.spawnSync('npm', ['install', '--save', 'aws-amplify', 'cloudinary-core', 'is-mobile'], cb);
+      });
     }
   });
 

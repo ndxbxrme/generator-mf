@@ -4,10 +4,11 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
-    "start": "webpack-dev-server --host 0.0.0.0",
+    "start": "webpack-dev-server --host 0.0.0.0 --https",
     "test": "coffee -o test test && nodeunit test/test.js",
     "build": "rm -rf dist && webpack --config webpack.prod.js",
     "deploy": "node deploy.js && rm -rf dist/*.map && aws s3 rm <%= settings.s3bucket %> --recursive && aws s3 sync dist <%= settings.s3bucket %>",
+    "undeploy": "aws s3 rm <%= settings.s3bucket %> --recursive",
     "replace-android": "replace-in-file 'href=\"/\"' 'href=\"\"' android/app/src/main/assets/index.html",
     "replace-ios": "replace-in-file 'href=\"/\"' 'href=\"\"' ios/RSWebView/App/index.html",
     "android": "npm run build && rm -rf android/app/src/main/assets && cp -r dist android/app/src/main/assets && npm run replace-android && cd android && gradlew installDebug && cd .. && adb shell am start -n <%= settings.productPrefix %>.<%= settings.appName %>/.MainActivity",

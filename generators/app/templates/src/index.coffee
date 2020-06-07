@@ -37,6 +37,6 @@ require('./components.coffee') app
 window.addEventListener 'popstate', -> app.setState()
 main = ->
   try
-    app.loggedIn = true if app.user = await Auth.currentAuthenticatedUser()
+    <%= settings.cognitoUserPoolId?'':'#' %>app.loggedIn = true if app.user = await Auth.currentAuthenticatedUser()
   app.setState()
 main()
